@@ -2,6 +2,8 @@
 #include <fstream>
 #include <algorithm>
 #include <vector>
+#include <unordered_map>
+#include <iterator>
 
 using namespace std;
 
@@ -13,6 +15,9 @@ enum OctopiStatus { INITIAL, PROCESSED, FLASHING, FLASHED };
 struct Octopi {
     int val = 0;
     OctopiStatus status = INITIAL;
+
+    Octopi() { }   //advanced
+    Octopi(int v) { val = v; }   //advanced
 };
 
 void printAll(Octopi octopi[ROWS][COLS]) {
@@ -137,10 +142,55 @@ void day11p2() {
     cout << stepNum << endl;
 }
 
+struct LocIterator {
+    int row = 0;
+    int col = 0;
+
+    pair<int, int> operator*() {
+        pair<int,int> ret = {row, col};
+        if(++col == COLS)
+            ++row, col = 0;
+        return ret;
+    }
+
+    pair<int, int> operator++(int) {
+        pair<int,int> ret = {row, col};
+        if(++col == COLS)
+            ++row, col = 0;
+        return ret;
+    }
+
+    static pair<int, int> end() {
+        return pair<int,int>(ROWS, 0);
+    }
+};
+
+
+struct intPairHasher {
+    size_t operator() (const pair<int,int>& p) const {
+        return (p.first << 16) + p.second;
+    }
+};
+
+void day11p2Advanced() {
+    unordered_map<pair<int, int>, Octopi, intPairHasher> octopi;
+
+    LocIterator loc;
+    ifstream in("../input.txt");
+    for_each(istream_iterator<char>(in), istream_iterator<char>(),
+             [&](char c) { octopi.emplace(loc++, Octopi(c - '0')); }
+    );
+
+    for(LocIterator loc2; *loc2 != loc2.end(); loc2++) {
+        cout << loc2.row <<  "" << loc2.col << ":" << octopi[*loc2].val << endl;
+    }
+}
 
 int main()
 {
     day11p1();
     cout << "-------------------------------" << endl;
     day11p2();
+    cout << "-------------------------------" << endl;
+    day11p2Advanced();
 }

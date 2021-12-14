@@ -3,6 +3,7 @@
 #include <unordered_map>
 #include <vector>
 #include <algorithm>
+#include <ctime>
 
 
 using namespace std;
@@ -114,18 +115,8 @@ StringCharMap makeRulePairs(Rule rules[NUM_RULES]) {
     return pairMap;
 }
 
-void setOrModify(StringIntMap& pairs, const string& pair, uint64_t amount) {
-    auto pairIt = pairs.find(pair);
-    if(pairIt != pairs.end()) {
-        pairIt->second += amount;
-    } else
-        pairs[pair] = amount;
-
-    //cout << "  " << pair << " " << pairs[pair] << endl;
-}
-
 StringIntMap doMapIteration(const StringIntMap& pairs, const StringCharMap& ruleMap) {
-    StringIntMap newPairs = pairs;
+    StringIntMap newPairs;
     for(const auto& kv : pairs) {
         string pair = kv.first;
         uint64_t copies = kv.second;
@@ -138,11 +129,10 @@ StringIntMap doMapIteration(const StringIntMap& pairs, const StringCharMap& rule
             newPair1[1] = ruleIt->second;
             string newPair2 = pair;
             newPair2[0] = ruleIt->second;
+
             //cout << pair << "-" << copies << " " << newPair1 << " " << newPair2 << endl;
-            setOrModify(newPairs, newPair1, copies);
-            setOrModify(newPairs, newPair2, copies);
-            auto pairIt = newPairs.find(pair);
-            pairIt->second -= copies;
+            newPairs[newPair1] += copies;
+            newPairs[newPair2] += copies;
             //cout << pair << "-" << copies << endl;
         }
     }
@@ -188,5 +178,7 @@ int main()
 {
     day13p1();
     cout << "-------------------------------" << endl;
+    auto startT = clock();
     day13p2();
+    cout << clock() - startT << endl;
 }
