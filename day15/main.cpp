@@ -94,8 +94,8 @@ void calcCosts(int grid[EXPANDED_SIZE][EXPANDED_SIZE],
 
     int minCost = INT_MAX;
     priority_queue<Step, std::vector<Step>, StepComparer> steps;
-    steps.emplace(Step({{0,0}, {1,0}, 200}));  //first two possible moves
-    steps.emplace(Step({{0,0}, {0,1}, 200}));
+    steps.emplace(Step({{0,0}, {1,0}, 0}));  //first two possible moves
+    steps.emplace(Step({{0,0}, {0,1}, 0}));
 
     while(!steps.empty()) {
         Step s = steps.top();
