@@ -17,12 +17,7 @@ struct Target{
 enum ResultCategory { UNDER, OVER, FAIL_TO_REACH, HIT, OTHER };
 
 struct Result {
-    bool hit = false;
     int maxHeight = INT_MIN;
-    int finalY = 0;
-    int finalX = 0;
-    int finalXVel = 0;
-    int finalYVel = 0;
     ResultCategory kind = OTHER;
 };
 
@@ -49,11 +44,10 @@ Result fire(int xVel, int yVel, const Target& t) {
             r.maxHeight = y;
 
         if(t.x1 <= x && x <= t.x2 && t.y1 <= y && y <= t.y2) {
-            r.hit = true;
             r.kind = HIT;
         }
 
-        if(r.hit && y < 0)
+        if(r.kind == HIT && y < 0)
             break;   //Once hit, wait for it to stop going up
         else if(x > t.x2 && xVel > 0) {
             break;   //Overshot horizontal
@@ -80,7 +74,7 @@ void day17p1(const Target& t) {
     for(int xVel = 1; xVel <= t.x2; xVel++) {
         for(int yVel = 0; yVel <= -t.y1; yVel++) {
             Result r = fire(xVel, yVel, t);
-            if(r.hit) {
+            if(r.kind == HIT) {
                 if(r.maxHeight > maxHeightSeen)
                     maxHeightSeen = r.maxHeight;
             } else {
@@ -102,7 +96,7 @@ void day17p2(const Target& t) {
         //No point in speeds that on return will be moving faster than gap to target (upper bound -t.y1)
         for(int yVel = 0; yVel <= -t.y1; yVel++) {
             Result r = fire(xVel, yVel, t);
-            if(r.hit) {
+            if(r.kind == HIT) {
                 count++;
             } else {
                 if(r.kind == OVER || r.kind == FAIL_TO_REACH)
@@ -114,7 +108,7 @@ void day17p2(const Target& t) {
         //No point in speeds sufficient to move past target in one step (lower bound t.y1)
         for(int yVel = -1;  yVel >= t.y1; yVel--) {
             Result r = fire(xVel, yVel, t);
-            if(r.hit) {
+            if(r.kind == HIT) {
                 count++;
             } else {
                 if(r.kind == UNDER || r.kind == FAIL_TO_REACH)
