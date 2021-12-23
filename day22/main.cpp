@@ -10,6 +10,7 @@
 #include <stack>
 #include <deque>
 #include <charconv>
+#include <climits>
 #include <cstring>
 
 using namespace std;
@@ -37,6 +38,12 @@ struct Cuboid {
         memcpy(coords, other.coords, 6 * sizeof(int));
         on = other.on;
     }
+    ~Cuboid() {
+        for(int i = 0; i < 3; i++) {
+            if( children[i][MIN] ) delete children[i][MIN];
+            if( children[i][MAX] ) delete children[i][MAX];
+        }
+    }
     Cuboid& operator=(const Cuboid& other);
 
     //Find cuboid containing bits extending beyond c in dimension/direction pair
@@ -61,8 +68,10 @@ struct Cuboid {
                 //Constrain dimension to cut
                 part->coords[i][MIN] = max(coords[i][MIN], c->coords[i][MIN]);
                 part->coords[i][MAX] = min(coords[i][MAX], c->coords[i][MAX]);
-                if(part->coords[i][MIN] > part->coords[i][MAX])
+                if(part->coords[i][MIN] > part->coords[i][MAX]) {
+                    delete part;
                     return nullptr;
+                }
             }
         }
 
@@ -109,7 +118,7 @@ Cuboid* pushInto(Cuboid* parent, Cuboid* target) {
         parent->children[i][MIN] = pushInto(parent->children[i][MIN], target->partBeyond(parent, i, MIN));
         parent->children[i][MAX] = pushInto(parent->children[i][MAX], target->partBeyond(parent, i, MAX));
     }
-
+    delete target;
     return parent;
 }
 
@@ -175,7 +184,8 @@ int main()
 
     Cuboid* root = nullptr;
     for(auto& c : steps) {
-        root = pushInto(root, &c);
+        root = pushInto(root, new Cuboid(c));
     }
     cout << root->getNumOn() << endl;
+    delete root;
 }
